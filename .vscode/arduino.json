@@ -1,4 +1,0 @@
-{
-    "board": "attiny:avr:ATtinyX5",
-    "configuration": "cpu=attiny85,clock=external8"
-}
