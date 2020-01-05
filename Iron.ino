@@ -1,20 +1,22 @@
-#include <TinyWireM.h>
+#include <Wire.h>
 
-#define pin_pwm 6
-#define pin_ponent 2
-#define pin_sensor 3
+#define pin_pwm 1
+#define pin_ponent 3
+#define pin_sensor 4
 
 unsigned long lastTimeCheckedTemp = 0;
 byte pwm_lvl = 0;
 byte delta = 0;
 
 void setup() {
-  TinyWireM.begin();
+  delay(500); //LCD doesn't start properly w/o these delays
+  Wire.begin();
+  delay(500); //LCD doesn't start properly w/o these delays
   oledInit();
   oledClear();
   pinMode(pin_pwm, OUTPUT);
-  //pinMode(pin_ponent, INPUT_PULLUP); //not needed
   pinMode(pin_sensor, INPUT);
+  text();
 }
 
 void loop()
@@ -35,7 +37,6 @@ void loop()
 
     analogWrite(pin_pwm, pwm_lvl);
 
-    text();
     digit(t_real, 0); digit(t_real, 1);
     digit(pwm_lvl, 2); digit(pwm_lvl, 3);
 
