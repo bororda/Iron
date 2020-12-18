@@ -1,42 +1,53 @@
-#include <Wire.h>
+#include <TinyWireM.h>
 
-#define pin_pwm 1
-#define pin_ponent 3
-#define pin_sensor 4
+#define pin_pwm 6
+#define pin_ponent 2
+#define pin_sensor 3
 
 unsigned long lastTimeCheckedTemp = 0;
-byte pwm_lvl = 0;
-byte delta = 0;
+int pwm_lvl;
+
+int t_real;
+int t_target;
+
+float kp = 5;
+float ki = 1.6;
+float kd = 0.2;
+
+float P = 0;
+float prevErr = 0;
+float I = 0;
+float D = 0;
 
 void setup() {
-  delay(500); //LCD doesn't start properly w/o these delays
-  Wire.begin();
-  delay(500); //LCD doesn't start properly w/o these delays
+  TinyWireM.begin();
   oledInit();
   oledClear();
   pinMode(pin_pwm, OUTPUT);
+  //pinMode(pin_ponent, INPUT_PULLUP); //not needed
   pinMode(pin_sensor, INPUT);
-  text();
+  t_target = analogRead(pin_ponent);
 }
 
 void loop()
 {
-  byte t_real = analogRead(pin_sensor);
-  byte t_target = analogRead(pin_ponent);
-  if ((millis() - lastTimeCheckedTemp) >= 2000)
+  if ((millis() - lastTimeCheckedTemp) >= 100)
   {
-    if (t_target > t_real)
-    {
-      delta = t_target - t_real;
-      if (delta<16 & delta >= 8) pwm_lvl = 220;
-      else if (delta<8 & delta >= 4) pwm_lvl = 170;
-      else if (delta < 4) pwm_lvl = 120;
-      else pwm_lvl = 255;
-    }
-    else pwm_lvl = 0;
+    t_sens = analogRead(pin_sensor);
+    t_real = t_sens * 0.2 + t_real * 0.8; //apply running average filter
+
+    t_potent = analogRead(pin_ponent);
+    t_target = t_potent * 0.2 + t_target * 0.8; //apply running average filter
+
+    P = t_target - t_real;
+    I += P * 0.1;
+    D = (P - prevErr) / 0.1;
+    prevErr = P;
+    pwm_lvl = P * kp + constrain(I * ki, 0, 1023) + D * kd;
 
     analogWrite(pin_pwm, pwm_lvl);
 
+    text();
     digit(t_real, 0); digit(t_real, 1);
     digit(pwm_lvl, 2); digit(pwm_lvl, 3);
 
