@@ -34,24 +34,24 @@ const uint8_t textArea[][8] PROGMEM = {
   {0xE8, 0x98, 0x98, 0x98, 0xE8, 0x8A, 0x8D, 0x88}, // PW @ line 3
 };
 void oledInit() {
-  Wire.beginTransmission(OLED_ADDRESS);
-  Wire.write(OLED_COMMAND_MODE);
-  for (uint8_t i = 0; i < 20; i++) Wire.write(pgm_read_byte(&_oled_init[i]));
-  Wire.endTransmission();
+  TinyWireM.beginTransmission(OLED_ADDRESS);
+  TinyWireM.send(OLED_COMMAND_MODE);
+  for (uint8_t i = 0; i < 20; i++) TinyWireM.send(pgm_read_byte(&_oled_init[i]));
+  TinyWireM.endTransmission();
 }
 
 void oledClear() {
   oledRange(9, 127, 0, 3);
   for (uint8_t i = 0; i < 32; i++) {
-    Wire.beginTransmission(OLED_ADDRESS);
-    Wire.write(OLED_DATA_MODE);
-    for (uint8_t i = 0; i < 32; i++) Wire.write(0);
-    Wire.endTransmission();
+    TinyWireM.beginTransmission(OLED_ADDRESS);
+    TinyWireM.send(OLED_DATA_MODE);
+    for (uint8_t i = 0; i < 32; i++) TinyWireM.send(0);
+    TinyWireM.endTransmission();
   }
 }
 
-void digit(uint8_t temperature, uint8_t line) { //value odd line 191, even line 253
-  uint8_t temp = temperature / 2;
+void digit(int temperature, uint8_t line) { //value odd line 191, even line 253
+  uint8_t temp = temperature / 8;
   if (temp < 9) {
     temp = 9;
   }
@@ -69,15 +69,15 @@ void digit(uint8_t temperature, uint8_t line) { //value odd line 191, even line 
   oledRange(9, 127, line, line);
 
   for (uint8_t i = 9; i < 127; i++) {
-    Wire.beginTransmission(OLED_ADDRESS);
-    Wire.write(OLED_DATA_MODE);
+    TinyWireM.beginTransmission(OLED_ADDRESS);
+    TinyWireM.send(OLED_DATA_MODE);
     for (uint8_t x = 0; x < 7; x++) {
-      if (i < temp) Wire.write(valueF);
-      else Wire.write(valueE);
+      if (i < temp) TinyWireM.send(valueF);
+      else TinyWireM.send(valueE);
       i++;
     }
     i--;
-    Wire.endTransmission();
+    TinyWireM.endTransmission();
   }
 }
 
@@ -86,21 +86,20 @@ void text() {
 
     oledRange(0, 7, line, line);
 
-    Wire.beginTransmission(OLED_ADDRESS);
-    Wire.write(OLED_DATA_MODE);
+    TinyWireM.beginTransmission(OLED_ADDRESS);
+    TinyWireM.send(OLED_DATA_MODE);
     for (uint8_t x = 0; x < 8; x++) {
       uint8_t bits = pgm_read_byte(&textArea[line][x]);
-      Wire.write(bits);
+      TinyWireM.send(bits);
     }
-    Wire.endTransmission();
+    TinyWireM.endTransmission();
   }
 }
 
 void oledRange(uint8_t col1, uint8_t col2, uint8_t pg1, uint8_t pg2) {
-  Wire.beginTransmission(OLED_ADDRESS);
-  Wire.write(OLED_COMMAND_MODE);
-  Wire.write(COL_ADDRESS); Wire.write(col1); Wire.write(col2); // Set column address range
-  Wire.write(PAGE_ADDRESS); Wire.write(pg1); Wire.write(pg2); // Set page address range
-  Wire.endTransmission();
+  TinyWireM.beginTransmission(OLED_ADDRESS);
+  TinyWireM.send(OLED_COMMAND_MODE);
+  TinyWireM.send(COL_ADDRESS); TinyWireM.send(col1); TinyWireM.send(col2); // Set column address range
+  TinyWireM.send(PAGE_ADDRESS); TinyWireM.send(pg1); TinyWireM.send(pg2); // Set page address range
+  TinyWireM.endTransmission();
 }
-
