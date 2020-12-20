@@ -1,14 +1,14 @@
-#include <TinyWireM.h>
-
+#include <Wire.h>
 #define pin_pwm 6
 #define pin_ponent 2
 #define pin_sensor 3
 
 unsigned long lastTimeCheckedTemp = 0;
-int pwm_lvl;
-
-int t_real;
-int t_target;
+int pwm_lvl = 0;
+int t_sens = 0;
+int t_real = 0;
+int t_potent = 0;
+int t_target = 0;
 
 float kp = 5;
 float ki = 1.6;
@@ -20,11 +20,10 @@ float I = 0;
 float D = 0;
 
 void setup() {
-  TinyWireM.begin();
+  Wire.begin();
   oledInit();
   oledClear();
   pinMode(pin_pwm, OUTPUT);
-  //pinMode(pin_ponent, INPUT_PULLUP); //not needed
   pinMode(pin_sensor, INPUT);
   t_target = analogRead(pin_ponent);
 }
@@ -35,7 +34,6 @@ void loop()
   {
     t_sens = analogRead(pin_sensor);
     t_real = t_sens * 0.2 + t_real * 0.8; //apply running average filter
-
     t_potent = analogRead(pin_ponent);
     t_target = t_potent * 0.2 + t_target * 0.8; //apply running average filter
 
@@ -48,7 +46,7 @@ void loop()
     analogWrite(pin_pwm, pwm_lvl);
 
     text();
-    digit(t_real, 0); digit(t_real, 1);
+    digit(t_potent, 0); digit(t_real, 1);
     digit(pwm_lvl, 2); digit(pwm_lvl, 3);
 
     lastTimeCheckedTemp = millis();
