@@ -1,7 +1,7 @@
 #include <Wire.h>
-#define pin_pwm 6
-#define pin_ponent 2
-#define pin_sensor 3
+#define pin_pwm 1
+#define pin_ponent A3
+#define pin_sensor A2
 
 unsigned long lastTimeCheckedTemp = 0;
 int pwm_lvl = 0;
